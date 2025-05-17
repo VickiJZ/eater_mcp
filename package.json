@@ -1,0 +1,47 @@
+{
+    "name": "eater-mcp",
+    "version": "0.0.1",
+    "description": "MCP server for restaurant discovery on eater.com",
+    "type": "module",
+    "author": "underdog",
+    "keywords": [
+        "mcp",
+        "eater",
+        "restaurant discovery"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "bin": {
+        "eater-mcp": "dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc && shx chmod +x dist/*.js",
+        "prepare": "npm run build",
+        "watch": "tsc --watch",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --clearCache && node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.0.1",
+        "cheerio": "^1.0.0",
+        "node-fetch": "^3.3.2",
+        "puppeteer": "^22.13.1",
+        "robots-parser": "^3.0.1"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.27.1",
+        "@babel/preset-env": "^7.27.2",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.13.9",
+        "@types/node-fetch": "^2.6.12",
+        "babel-jest": "^29.7.0",
+        "jest": "^29.7.0",
+        "shx": "^0.3.4",
+        "ts-jest": "^29.3.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
+    }
+}
