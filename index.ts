@@ -8,11 +8,7 @@ import {
   ErrorCode,
   CallToolRequest,
 } from "@modelcontextprotocol/sdk/types.js";
-import puppeteer from "puppeteer";
-import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { HtmlDataExtractor, TagMapping, ParsedOutput } from './src/HtmlDataExtractor.js';
-
+import { runCrawler } from "./src/crawler.js";
 // Tool definitions
 const EATER_SEARCH_TOOL: Tool = {
   name: "eater_search",
@@ -33,53 +29,27 @@ const EATER_TOOLS = [
   EATER_SEARCH_TOOL,
 ] as const;
 
-// Utility functions
-const USER_AGENT = "ModelContextProtocol/1.0 (Autonomous; +https://github.com/modelcontextprotocol/servers)";
-const BASE_URL = "https://eater.com"; // Assuming Eater.com is the target, this might need to be updated
-
-// // Define your specific mapping for Eater data extraction
-// const EATER_ITEM_MAPPING: TagMapping = {
-//   // Ensure these class names are correct for what's inside each div.ScrollTo item
-//   restaurant_name: 'SearchResult__venue-name', // Example, verify this class is within div.ScrollTo
-//   time: 'ReservationButton__time',        // Example, verify this class is within div.ScrollTo
-//   // Add other fields if needed, e.g., address, rating, etc.
-//   // Ensure the class names are relative to the content of each div.ScrollTo
-// };
-
-// const EATER_ITEM_SELECTOR = '.SearchResultsContainer__results .ScrollTo'; // The selector for each restaurant block
-
 // API handlers
 export async function handleEaterSearch(params: any) {
-  const {
-    keywords
-  } = params;
-  const aggregated: { query: string; data: ParsedOutput[] }[] = [];
-
-  let browser: puppeteer.Browser | undefined;
-  try {
-    browser = await puppeteer.launch({ headless: true });
-
-    for (const q of keywords) {
-      // TODO: find out whether to pass in keywords here or not, and how to pass in multiple keywords
-
-      continue;
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Error launching puppeteer:", errorMessage);
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
+  // Ensure params and params.keywords are valid
+  if (!params || !params.keywords || !Array.isArray(params.keywords) || params.keywords.length === 0) {
+    console.error('handleEaterSearch: Invalid or missing keywords in params.');
+    return { error: 'Invalid keywords provided' }; 
   }
 
-  return {
-    content: [{
-      type: "text",
-      text: JSON.stringify(aggregated, null, 2)
-    }],
-    isError: false
-  };
+  try {
+    console.log(`handleEaterSearch: Received keywords: ${params.keywords.join(', ')}`);
+    const venues = await runCrawler(params.keywords); // venues is an array of Venue objects
+    console.log(`handleEaterSearch: Found ${venues.length} venues.`);
+    
+    // Extract only the names
+    const venueNames = venues.map(venue => venue.name);
+    
+    return { data: venueNames }; // Return array of names
+  } catch (error) {
+    console.error('handleEaterSearch: Error during crawler execution:', error);
+    return { error: 'Crawler failed to execute', details: error instanceof Error ? error.message : String(error) };
+  }
 }
 
 // Server setup

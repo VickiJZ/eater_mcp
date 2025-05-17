@@ -4,12 +4,7 @@ import { handleEaterSearch } from '../index.js'; // Adjust the import path if ne
 
 async function testHandleEaterSearch() {
   const testParams = {
-    city: "new-york-ny",
-    seat_number: 4,
-    date: "2025-05-21",
-    time: "1900",
-    cuisine: "American",
-    query_keywords: ["lower east side", "east village"],
+    keywords: ["burger"],
   };
 
   try {
